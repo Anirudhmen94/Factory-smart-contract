@@ -1,0 +1,42 @@
+const Web3 = require('web3');
+const factoryAbi = require('./build/contracts/Factory.json').abi;
+
+const web3 = new Web3('https://mainnet.infura.io/v3/your-project-id');
+const factoryAddress = '0x123456789...'; 
+const factory = new web3.eth.Contract(factoryAbi, factoryAddress);
+
+const privateKey = '0x123456789...'; 
+const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+const minterRole = '0x123456789...'; 
+
+
+async function mintNft(tokenId, metadataUri) {
+  const tokenAddress = await factory.methods.deployToken().send({
+    from: account.address,
+    gas: 5000000
+  });
+
+  const tokenAbi = await getAbi(tokenAddress);
+  const token = new web3.eth.Contract(tokenAbi, tokenAddress);
+
+  await token.methods.grantRole(minterRole, account.address).send({
+    from: account.address,
+    gas: 500000
+  });
+
+  await token.methods.mint(account.address, tokenId, metadataUri).send({
+    from: account.address,
+    gas: 500000
+  });
+}
+
+
+async function getAbi(contractAddress) {
+  const response = await web3.eth.getCode(contractAddress);
+  const code = response.slice(2);
+  const decodedCode = web3.eth.abi.decodeParameter('bytes', '0x' + code);
+  return JSON.parse(decodedCode);
+}
+
+
+
