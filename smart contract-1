@@ -1,0 +1,42 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Ownerchange{
+    address private Owner;
+     event AddressChanged(address indexed Owner, address indexed newOwner);
+     event ValueChanged(uint indexed previousValue, uint indexed newValue);
+     uint256 public previousValue;
+    
+
+constructor ()  {
+    msg.sender==Owner;
+    
+
+}
+modifier owner(){
+    require (Owner==msg.sender);
+    _;
+}
+function transferownership (address newowner) public payable owner {
+
+require(newowner!=address(0));
+newowner=Owner;
+
+require(msg.value>address(this).balance);
+emit AddressChanged (Owner,newowner);
+
+}
+function getvalue() public view returns(uint256){
+    return address(this).balance;
+}
+function getaddress()public view returns(address){
+    return msg.sender;
+}
+function Totalvalue(uint totalvalue,uint256 value_change) public owner returns(uint256){
+    previousValue=totalvalue;
+    totalvalue+=value_change;
+    require(address(this).balance>999,'Value lesser than 999');
+    return totalvalue;
+    emit ValueChanged(previousValue,totalvalue);
+}
+}
